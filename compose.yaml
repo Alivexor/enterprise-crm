@@ -1,0 +1,109 @@
+name: enterprise-crm
+
+x-backend-environment: &backend-environment
+  DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-enterprise_crm}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-enterprise_crm}
+  ENVIRONMENT: development
+  DEFAULT_ORGANIZATION_ID: ${DEFAULT_ORGANIZATION_ID:?Set DEFAULT_ORGANIZATION_ID in the root .env file}
+  DEFAULT_ORGANIZATION_NAME: ${DEFAULT_ORGANIZATION_NAME:-Enterprise CRM}
+  DEFAULT_ADMIN_EMAIL: ${DEFAULT_ADMIN_EMAIL:?Set DEFAULT_ADMIN_EMAIL in the root .env file}
+  DEFAULT_ADMIN_PASSWORD: ${DEFAULT_ADMIN_PASSWORD:?Set DEFAULT_ADMIN_PASSWORD in the root .env file}
+  DEFAULT_ADMIN_FIRST_NAME: ${DEFAULT_ADMIN_FIRST_NAME:-Admin}
+  DEFAULT_ADMIN_LAST_NAME: ${DEFAULT_ADMIN_LAST_NAME:-User}
+  JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in the root .env file}
+  JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+  JWT_ACCESS_TOKEN_EXPIRE_MINUTES: ${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-15}
+  JWT_REFRESH_TOKEN_EXPIRE_DAYS: ${JWT_REFRESH_TOKEN_EXPIRE_DAYS:-7}
+  ALLOW_SELF_REGISTRATION: ${ALLOW_SELF_REGISTRATION:-false}
+  ATTACHMENT_STORAGE_BACKEND: local
+  ATTACHMENT_LOCAL_STORAGE_PATH: /data/attachments
+  ATTACHMENT_MAX_UPLOAD_BYTES: ${ATTACHMENT_MAX_UPLOAD_BYTES:-10485760}
+  IMPORT_EXPORT_MAX_UPLOAD_BYTES: ${IMPORT_EXPORT_MAX_UPLOAD_BYTES:-5242880}
+  IMPORT_EXPORT_MAX_ROWS: ${IMPORT_EXPORT_MAX_ROWS:-5000}
+  HTTP_MAX_REQUEST_BYTES: ${HTTP_MAX_REQUEST_BYTES:-26214400}
+  OLLAMA_ENABLED: "false"
+  OLLAMA_BASE_URL: http://127.0.0.1:11434
+  OLLAMA_MODEL: ${OLLAMA_MODEL:-gemma3:4b}
+  OLLAMA_TIMEOUT_SECONDS: ${OLLAMA_TIMEOUT_SECONDS:-60}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-enterprise_crm}
+      POSTGRES_USER: ${POSTGRES_USER:-enterprise_crm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in the root .env file}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-enterprise_crm} -d ${POSTGRES_DB:-enterprise_crm}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 5s
+
+  migrate:
+    build:
+      context: ./backend
+    restart: "no"
+    environment: *backend-environment
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment: *backend-environment
+    volumes:
+      - attachment_data:/data/attachments
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health/ready', timeout=3).read()"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  worker:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment: *backend-environment
+    command: ["python", "-m", "app.scripts.run_worker", "--interval", "15"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE_URL: /api
+    restart: unless-stopped
+    environment:
+      BACKEND_API_URL: http://backend:8000/api/v1
+      NEXT_PUBLIC_API_BASE_URL: /api
+      AUTH_REFRESH_TOKEN_MAX_AGE_SECONDS: ${AUTH_REFRESH_TOKEN_MAX_AGE_SECONDS:-604800}
+      BACKEND_API_TIMEOUT_MS: ${BACKEND_API_TIMEOUT_MS:-10000}
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/login').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+volumes:
+  postgres_data:
+  attachment_data:

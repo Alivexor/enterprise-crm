@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      DATABASE_URL: sqlite+pysqlite:///./ci.sqlite3
+      ENVIRONMENT: test
+      DEFAULT_ORGANIZATION_ID: 00000000-0000-0000-0000-000000000001
+      JWT_SECRET: 0123456789abcdef0123456789abcdef0123456789abcdef
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e ".[dev]"
+      - run: python -m compileall app migrations tests
+      - run: alembic upgrade head
+      - run: alembic current
+      - run: alembic check
+      - run: python -m unittest discover -s tests -v
+      - run: python -m app.scripts.run_worker --once
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_PUBLIC_API_BASE_URL: /api
+      BACKEND_API_URL: http://127.0.0.1:8000/api/v1
+      AUTH_REFRESH_TOKEN_MAX_AGE_SECONDS: 604800
+      BACKEND_API_TIMEOUT_MS: 10000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build

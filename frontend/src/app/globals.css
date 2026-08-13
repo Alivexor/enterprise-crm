@@ -1,0 +1,482 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --app-background: #f4f6fb;
+  --background: #f7f8fc;
+  --foreground: #111827;
+  --surface: rgba(255, 255, 255, 0.86);
+  --surface-strong: #ffffff;
+  --surface-muted: #f8fafc;
+  --surface-elevated: rgba(255, 255, 255, 0.96);
+  --border: rgba(148, 163, 184, 0.22);
+  --border-strong: rgba(100, 116, 139, 0.28);
+  --muted: #64748b;
+  --muted-strong: #475569;
+  --accent: #5b5cf0;
+  --accent-strong: #4748d9;
+  --accent-soft: rgba(91, 92, 240, 0.10);
+  --cyan: #06b6d4;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef476f;
+  --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.03), 0 10px 32px rgba(15, 23, 42, 0.055);
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.035), 0 14px 40px rgba(15, 23, 42, 0.07);
+  --shadow-float: 0 22px 60px rgba(15, 23, 42, 0.16);
+  --radius-card: 20px;
+  --radius-control: 12px;
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: "Segoe UI Variable", "Segoe UI", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --font-mono: "Cascadia Code", Consolas, "Courier New", monospace;
+}
+
+:root.dark {
+  --app-background: #070a12;
+  --background: #090d16;
+  --foreground: #f1f5f9;
+  --surface: rgba(15, 23, 42, 0.74);
+  --surface-strong: #0f172a;
+  --surface-muted: #111827;
+  --surface-elevated: rgba(15, 23, 42, 0.94);
+  --border: rgba(148, 163, 184, 0.12);
+  --border-strong: rgba(148, 163, 184, 0.20);
+  --muted: #94a3b8;
+  --muted-strong: #cbd5e1;
+  --accent: #818cf8;
+  --accent-strong: #a5b4fc;
+  --accent-soft: rgba(99, 102, 241, 0.16);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.18), 0 14px 40px rgba(0, 0, 0, 0.20);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.20), 0 16px 48px rgba(0, 0, 0, 0.26);
+  --shadow-float: 0 24px 72px rgba(0, 0, 0, 0.44);
+  color-scheme: dark;
+}
+
+html {
+  background: var(--app-background);
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 78% -12%, rgba(99, 102, 241, 0.09), transparent 31rem),
+    radial-gradient(circle at 4% 28%, rgba(6, 182, 212, 0.055), transparent 26rem),
+    linear-gradient(180deg, #fbfcff 0%, var(--background) 42%, var(--app-background) 100%);
+  color: var(--foreground);
+  font-family: "Segoe UI Variable", "Segoe UI", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+}
+
+.dark body {
+  background:
+    radial-gradient(circle at 78% -10%, rgba(99, 102, 241, 0.18), transparent 34rem),
+    radial-gradient(circle at 0% 34%, rgba(6, 182, 212, 0.08), transparent 30rem),
+    linear-gradient(180deg, #080b14 0%, var(--background) 52%, var(--app-background) 100%);
+}
+
+::selection { background: #c7d2fe; color: #1e1b4b; }
+.dark ::selection { background: #4338ca; color: #eef2ff; }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+* { scrollbar-color: #cbd5e1 transparent; scrollbar-width: thin; }
+.dark * { scrollbar-color: #334155 transparent; }
+
+button, a, input, select, textarea { -webkit-tap-highlight-color: transparent; }
+button, a { touch-action: manipulation; }
+
+/* ---- Product design system ------------------------------------------------ */
+.crm-main {
+  position: relative;
+  isolation: isolate;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px);
+  background-size: 36px 36px;
+  background-position: center top;
+}
+
+.dark .crm-main {
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.022) 1px, transparent 1px);
+}
+
+.crm-main::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgba(255,255,255,.5), transparent 18rem);
+  mask-image: linear-gradient(to bottom, black, transparent 38rem);
+}
+.dark .crm-main::before { background: linear-gradient(180deg, rgba(15,23,42,.28), transparent 18rem); }
+
+.crm-page { animation: crm-enter .38s cubic-bezier(.22,.85,.32,1) both; }
+.crm-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  color: var(--accent);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.crm-kicker::before {
+  content: "";
+  width: .42rem;
+  height: .42rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent), var(--cyan));
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.crm-title {
+  color: var(--foreground);
+  font-size: clamp(1.9rem, 3vw, 2.55rem);
+  line-height: 1.08;
+  font-weight: 760;
+  letter-spacing: -.04em;
+}
+.crm-subtitle { color: var(--muted); font-size: .925rem; line-height: 1.65; }
+
+.crm-card {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-soft);
+}
+.crm-card-strong {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-card);
+}
+.crm-card-hover {
+  transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease, background-color .22s ease;
+}
+.crm-card-hover:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+  box-shadow: var(--shadow-card);
+}
+
+.crm-toolbar {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface-strong) 88%, transparent);
+  padding: .55rem;
+  box-shadow: 0 1px 2px rgba(15,23,42,.03);
+  backdrop-filter: blur(16px);
+}
+
+.crm-input,
+.crm-select,
+.crm-textarea {
+  border: 1px solid var(--border-strong) !important;
+  border-radius: var(--radius-control) !important;
+  background: color-mix(in srgb, var(--surface-strong) 94%, transparent) !important;
+  color: var(--foreground) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, .025), inset 0 1px 0 rgba(255,255,255,.55);
+  transition: border-color .18s ease, box-shadow .18s ease, background-color .18s ease, transform .18s ease !important;
+}
+.dark .crm-input,
+.dark .crm-select,
+.dark .crm-textarea { box-shadow: inset 0 1px 0 rgba(255,255,255,.025); }
+.crm-input:hover,
+.crm-select:hover,
+.crm-textarea:hover { border-color: color-mix(in srgb, var(--accent) 30%, var(--border-strong)) !important; }
+.crm-input:focus,
+.crm-select:focus,
+.crm-textarea:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 4px var(--accent-soft), 0 1px 2px rgba(15,23,42,.04) !important;
+  outline: none !important;
+}
+.crm-input::placeholder,
+.crm-textarea::placeholder { color: color-mix(in srgb, var(--muted) 72%, transparent); }
+
+.crm-table-shell {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-soft);
+}
+.crm-table-head {
+  background: color-mix(in srgb, var(--surface-muted) 82%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.crm-table-row { transition: background-color .16s ease, transform .16s ease; }
+.crm-table-row:hover { background: color-mix(in srgb, var(--accent-soft) 45%, var(--surface-strong)); }
+
+.crm-divider { border-color: var(--border) !important; }
+.crm-muted { color: var(--muted) !important; }
+
+.crm-hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--accent) 14%, var(--border));
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at 92% -18%, rgba(99, 102, 241, .18), transparent 20rem),
+    radial-gradient(circle at 18% 115%, rgba(6, 182, 212, .10), transparent 20rem),
+    linear-gradient(135deg, color-mix(in srgb, var(--surface-strong) 94%, #eef2ff), var(--surface-strong));
+  box-shadow: var(--shadow-soft);
+}
+.dark .crm-hero {
+  background:
+    radial-gradient(circle at 92% -18%, rgba(99, 102, 241, .22), transparent 22rem),
+    radial-gradient(circle at 18% 115%, rgba(6, 182, 212, .09), transparent 22rem),
+    linear-gradient(135deg, rgba(15,23,42,.95), rgba(8,12,24,.98));
+}
+.crm-hero::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: .45;
+  background-image: radial-gradient(rgba(99, 102, 241, .18) .7px, transparent .7px);
+  background-size: 12px 12px;
+  mask-image: linear-gradient(105deg, transparent 20%, black 100%);
+}
+
+.crm-metric {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-strong);
+  box-shadow: var(--shadow-soft);
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+.crm-metric:hover { transform: translateY(-2px); box-shadow: var(--shadow-card); border-color: color-mix(in srgb, var(--accent) 22%, var(--border)); }
+.crm-metric::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--cyan), transparent);
+  opacity: .72;
+}
+
+.crm-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface-strong) 86%, transparent);
+  padding: .3rem .65rem;
+  color: var(--muted-strong);
+  font-size: .72rem;
+  font-weight: 700;
+}
+
+.crm-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--border) 55%, transparent);
+}
+.crm-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.46), transparent);
+  animation: crm-shimmer 1.35s infinite;
+}
+.dark .crm-skeleton::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent); }
+
+.crm-scroll-mask { scrollbar-gutter: stable; overscroll-behavior: contain; }
+.crm-scroll-mask::-webkit-scrollbar { width: 7px; height: 7px; }
+.crm-scroll-mask::-webkit-scrollbar-thumb { background: rgba(148,163,184,.32); border-radius: 999px; }
+
+@keyframes crm-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes crm-shimmer { to { transform: translateX(100%); } }
+@keyframes crm-float {
+  0%, 100% { transform: translate3d(0,0,0); }
+  50% { transform: translate3d(0,-7px,0); }
+}
+
+/* Bilingual layout and typography */
+html[lang="fa"] body,
+html[lang="fa"] button,
+html[lang="fa"] input,
+html[lang="fa"] select,
+html[lang="fa"] textarea {
+  font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+  letter-spacing: normal;
+}
+html[dir="rtl"] body { direction: rtl; }
+html[dir="rtl"] input[type="email"],
+html[dir="rtl"] input[type="url"],
+html[dir="rtl"] input[type="tel"],
+html[dir="rtl"] input[type="password"],
+html[dir="rtl"] [data-bidi="ltr"] {
+  direction: ltr;
+  text-align: left;
+  unicode-bidi: plaintext;
+}
+html[dir="rtl"] .font-mono,
+html[dir="rtl"] code,
+html[dir="rtl"] pre { direction: ltr; text-align: left; }
+html[lang="fa"] .uppercase { text-transform: none; letter-spacing: normal; }
+html[dir="rtl"] .crm-kicker { letter-spacing: normal; }
+html[dir="rtl"] .crm-title { letter-spacing: -.02em; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+/* Shared resource-list polish: applied to existing list/table components without changing data logic. */
+.crm-table-shell > div:first-child,
+.crm-table-shell thead {
+  background: color-mix(in srgb, var(--surface-muted) 84%, transparent);
+  border-color: var(--border) !important;
+}
+.crm-table-shell > ul > li,
+.crm-table-shell tbody tr,
+.crm-table-shell > div + div { border-color: var(--border) !important; }
+.crm-table-shell tbody tr { transition: background-color .16s ease; }
+.crm-table-shell tbody tr:hover { background: color-mix(in srgb, var(--accent-soft) 32%, var(--surface-strong)); }
+.crm-table-shell > ul > li > a,
+.crm-table-shell > ul > li > button { transition: background-color .16s ease, transform .16s ease, box-shadow .16s ease; }
+.crm-table-shell > ul > li > a:hover,
+.crm-table-shell > ul > li > button:hover { background: color-mix(in srgb, var(--accent-soft) 35%, var(--surface-strong)) !important; }
+.crm-table-shell > ul > li > a:active,
+.crm-table-shell > ul > li > button:active { transform: scale(.998); }
+
+form label:not(.sr-only) { letter-spacing: -.005em; }
+fieldset { border-color: var(--border); }
+
+@media (min-width: 1024px) {
+  .crm-page > section.mx-auto { padding-bottom: 2rem; }
+}
+
+/* Small-surface motion: deliberately limited to overlays/popovers. */
+.crm-overlay-enter { animation: crm-overlay-in .16s ease-out both; }
+.crm-dialog-enter { animation: crm-dialog-in .22s cubic-bezier(.22,.85,.32,1) both; }
+.crm-popover-enter { animation: crm-popover-in .18s cubic-bezier(.22,.85,.32,1) both; }
+
+@keyframes crm-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes crm-dialog-in { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes crm-popover-in { from { opacity: 0; transform: translateY(-4px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+/* V3 Zero-Cost Intelligence — Aurora polish ------------------------------- */
+.crm-app-frame {
+  position: relative;
+  min-height: 100%;
+}
+.crm-app-frame::after {
+  content: "";
+  pointer-events: none;
+  position: fixed;
+  inset-inline: 17.5rem 0;
+  top: 68px;
+  height: 1px;
+  z-index: 10;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 18%, transparent), transparent);
+  opacity: .55;
+}
+@media (max-width: 1023px) { .crm-app-frame::after { inset-inline: 0; } }
+
+.crm-glass-strip {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--surface-strong) 90%, transparent);
+  box-shadow: 0 1px 2px rgba(15,23,42,.025), 0 10px 30px rgba(15,23,42,.035);
+  backdrop-filter: blur(14px);
+}
+
+.crm-inbox-stat {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background: var(--surface-strong);
+  padding: .9rem 1rem;
+  box-shadow: var(--shadow-soft);
+}
+.crm-inbox-stat::after {
+  content: "";
+  position: absolute;
+  inset-inline-end: -1.5rem;
+  top: -2rem;
+  width: 5.5rem;
+  height: 5.5rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, var(--accent-soft), transparent 68%);
+}
+
+.crm-inbox-item {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-strong);
+  box-shadow: 0 1px 2px rgba(15,23,42,.025);
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+.crm-inbox-item:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--accent) 23%, var(--border));
+  box-shadow: var(--shadow-soft);
+}
+.crm-inbox-item[data-unread="true"] {
+  border-color: color-mix(in srgb, var(--accent) 24%, var(--border));
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent-soft) 42%, var(--surface-strong)), var(--surface-strong) 72%);
+}
+
+.crm-inline-feedback {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, var(--border));
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--danger) 7%, var(--surface-strong));
+  padding: .85rem 1rem;
+  color: color-mix(in srgb, var(--danger) 82%, var(--foreground));
+  font-size: .82rem;
+  line-height: 1.55;
+}
+
+.crm-toast-progress {
+  position: absolute;
+  inset-inline: .75rem;
+  bottom: .3rem;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 70%, transparent);
+}
+.crm-toast-progress-bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--accent), var(--cyan));
+  animation: crm-toast-countdown linear forwards;
+}
+html[dir="rtl"] .crm-toast-progress-bar { transform-origin: right; }
+@keyframes crm-toast-countdown { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+
+/* Tighter large-screen rhythm: content feels deliberate rather than stretched. */
+@media (min-width: 1536px) {
+  .crm-main { padding-inline: clamp(2rem, 3vw, 3.25rem); }
+}

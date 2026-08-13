@@ -1,0 +1,11 @@
+import { NextResponse } from "next/server";
+
+import { proxyApiRequest } from "@/app/api/proxy";
+
+export async function GET(request: Request): Promise<NextResponse> {
+  return proxyApiRequest("/companies", request);
+}
+
+export async function POST(request: Request): Promise<NextResponse> {
+  return proxyApiRequest("/companies", request);
+}

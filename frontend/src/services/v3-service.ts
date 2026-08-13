@@ -1,0 +1,110 @@
+import { apiClient } from "@/services/api-client";
+import type {
+  AiCopilotResponse,
+  AiDealInsight,
+  AiStatus,
+  ApiKey,
+  ApiKeyCreated,
+  CustomFieldDefinition,
+  DataQuality,
+  Product,
+  Quote,
+  RelationshipHealth,
+  ReportBuilderResult,
+  RevenueForecast,
+  SalesGoal,
+  SavedView,
+  WebhookEndpoint,
+  WebhookCreated,
+  Workflow,
+  DashboardWidget,
+  SalesSequence,
+  SequenceEnrollment,
+  WebhookDelivery,
+  WinLossAnalytics,
+  LeadScore,
+  MorningBrief,
+} from "@/types/v3";
+
+function jsonBody(value: unknown): string {
+  return JSON.stringify(value);
+}
+
+export const v3Service = {
+  savedViews: {
+    list: (resource?: string) => apiClient.get<SavedView[]>(`/v3/saved-views${resource ? `?resource=${encodeURIComponent(resource)}` : ""}`),
+    create: (payload: unknown) => apiClient.post<SavedView>("/v3/saved-views", jsonBody(payload)),
+    update: (id: string, payload: unknown) => apiClient.patch<SavedView>(`/v3/saved-views/${id}`, jsonBody(payload)),
+    remove: (id: string) => apiClient.delete<void>(`/v3/saved-views/${id}`),
+  },
+  customFields: {
+    list: (entityType?: string) => apiClient.get<CustomFieldDefinition[]>(`/v3/custom-fields${entityType ? `?entity_type=${encodeURIComponent(entityType)}` : ""}`),
+    create: (payload: unknown) => apiClient.post<CustomFieldDefinition>("/v3/custom-fields", jsonBody(payload)),
+    update: (id: string, payload: unknown) => apiClient.patch<CustomFieldDefinition>(`/v3/custom-fields/${id}`, jsonBody(payload)),
+    remove: (id: string) => apiClient.delete<void>(`/v3/custom-fields/${id}`),
+    values: (entityType: string, entityId: string) => apiClient.get<{ entity_type: string; entity_id: string; values: Record<string, unknown> }>(`/v3/custom-fields/${entityType}/${entityId}/values`),
+    saveValues: (entityType: string, entityId: string, values: Record<string, unknown>) => apiClient.put<{ entity_type: string; entity_id: string; values: Record<string, unknown> }>(`/v3/custom-fields/${entityType}/${entityId}/values`, jsonBody({ values })),
+  },
+  automation: {
+    list: () => apiClient.get<Workflow[]>("/v3/automation/workflows"),
+    create: (payload: unknown) => apiClient.post<Workflow>("/v3/automation/workflows", jsonBody(payload)),
+    update: (id: string, payload: unknown) => apiClient.patch<Workflow>(`/v3/automation/workflows/${id}`, jsonBody(payload)),
+    remove: (id: string) => apiClient.delete<void>(`/v3/automation/workflows/${id}`),
+    run: (id: string, payload: unknown = {}) => apiClient.post(`/v3/automation/workflows/${id}/run`, jsonBody(payload)),
+  },
+  intelligence: {
+    dataQuality: () => apiClient.get<DataQuality>("/v3/intelligence/data-quality"),
+    forecast: () => apiClient.get<RevenueForecast>("/v3/reports/forecast"),
+    report: (resource: string, metric: string, groupBy: string) => apiClient.get<ReportBuilderResult>(`/v3/reports/builder?resource=${encodeURIComponent(resource)}&metric=${encodeURIComponent(metric)}&group_by=${encodeURIComponent(groupBy)}`),
+    relationshipHealth: (companyId: string) => apiClient.get<RelationshipHealth>(`/v3/intelligence/relationship-health/${companyId}`),
+    morningBrief: () => apiClient.get<MorningBrief>("/v3/intelligence/morning-brief"),
+    leadScore: (leadId: string) => apiClient.get<LeadScore>(`/v3/intelligence/lead-score/${leadId}`),
+    winLoss: () => apiClient.get<WinLossAnalytics>("/v3/reports/win-loss"),
+  },
+  goals: {
+    list: () => apiClient.get<SalesGoal[]>("/v3/goals"),
+    create: (payload: unknown) => apiClient.post<SalesGoal>("/v3/goals", jsonBody(payload)),
+    remove: (id: string) => apiClient.delete<void>(`/v3/goals/${id}`),
+  },
+  products: {
+    list: (includeInactive = false) => apiClient.get<Product[]>(`/v3/products?include_inactive=${includeInactive ? "true" : "false"}`),
+    create: (payload: unknown) => apiClient.post<Product>("/v3/products", jsonBody(payload)),
+    update: (id: string, payload: unknown) => apiClient.patch<Product>(`/v3/products/${id}`, jsonBody(payload)),
+  },
+  quotes: {
+    list: () => apiClient.get<Quote[]>("/v3/quotes"),
+    create: (payload: unknown) => apiClient.post<Quote>("/v3/quotes", jsonBody(payload)),
+    get: (id: string) => apiClient.get<Quote>(`/v3/quotes/${id}`),
+    approve: (id: string, note?: string) => apiClient.post<Quote>(`/v3/quotes/${id}/approve`, jsonBody({ note: note || null })),
+    reject: (id: string, note?: string) => apiClient.post<Quote>(`/v3/quotes/${id}/reject`, jsonBody({ note: note || null })),
+  },
+  ai: {
+    status: () => apiClient.get<AiStatus>("/v3/ai/status"),
+    copilot: (prompt: string, locale: "en" | "fa") => apiClient.post<AiCopilotResponse>("/v3/ai/copilot", jsonBody({ prompt, locale })),
+    streamCopilot: (prompt: string, locale: "en" | "fa", model?: string) => apiClient.streamPost("/v3/ai/copilot/stream", jsonBody({ prompt, locale, model })),
+    pullModel: (model: string) => apiClient.streamPost("/v3/ai/models/pull", jsonBody({ model })),
+    dealInsight: (dealId: string) => apiClient.post<AiDealInsight>(`/v3/ai/deals/${dealId}/insight`, jsonBody({})) ,
+  },
+  dashboards: {
+    list: () => apiClient.get<DashboardWidget[]>("/v3/dashboard-widgets"),
+    create: (payload: unknown) => apiClient.post<DashboardWidget>("/v3/dashboard-widgets", jsonBody(payload)),
+    update: (id: string, payload: unknown) => apiClient.patch<DashboardWidget>(`/v3/dashboard-widgets/${id}`, jsonBody(payload)),
+    remove: (id: string) => apiClient.delete<void>(`/v3/dashboard-widgets/${id}`),
+  },
+  sequences: {
+    list: () => apiClient.get<SalesSequence[]>("/v3/sequences"),
+    create: (payload: unknown) => apiClient.post<SalesSequence>("/v3/sequences", jsonBody(payload)),
+    remove: (id: string) => apiClient.delete<void>(`/v3/sequences/${id}`),
+    enrollments: () => apiClient.get<SequenceEnrollment[]>("/v3/sequences/enrollments"),
+    enroll: (sequenceId: string, payload: unknown) => apiClient.post<SequenceEnrollment>(`/v3/sequences/${sequenceId}/enroll`, jsonBody(payload)),
+  },
+  developer: {
+    apiKeys: () => apiClient.get<ApiKey[]>("/v3/developer/api-keys"),
+    createApiKey: (name: string) => apiClient.post<ApiKeyCreated>("/v3/developer/api-keys", jsonBody({ name })),
+    revokeApiKey: (id: string) => apiClient.delete<void>(`/v3/developer/api-keys/${id}`),
+    webhooks: () => apiClient.get<WebhookEndpoint[]>("/v3/developer/webhooks"),
+    createWebhook: (payload: unknown) => apiClient.post<WebhookCreated>("/v3/developer/webhooks", jsonBody(payload)),
+    deliveries: () => apiClient.get<WebhookDelivery[]>("/v3/developer/webhook-deliveries"),
+    retryDelivery: (id: string) => apiClient.post<WebhookDelivery>(`/v3/developer/webhook-deliveries/${id}/retry`, jsonBody({})),
+  },
+};
